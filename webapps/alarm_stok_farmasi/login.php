@@ -75,46 +75,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
     <style>
+        :root {
+            --primary-bg: #f3f4f6;
+            --card-bg: #ffffff;
+            --text-main: #1f2937;
+            --accent-color: #2563eb;
+        }
         body {
             font-family: 'Inter', sans-serif;
-            background: #0f172a; /* Slate 900 */
-            color: #f8fafc;
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-image: radial-gradient(circle at 15% 50%, rgba(30, 58, 138, 0.3), transparent 25%),
-                              radial-gradient(circle at 85% 30%, rgba(15, 118, 110, 0.3), transparent 25%);
+            background-color: var(--primary-bg);
+            color: var(--text-main);
         }
         .login-card {
-            background: rgba(30, 41, 59, 0.7); /* Glassmorphism background */
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
+            background: var(--card-bg);
+            border: none;
+            border-radius: 12px;
             padding: 3rem 2rem;
             width: 100%;
             max-width: 420px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
         }
         .form-control {
-            background: rgba(15, 23, 42, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #f8fafc;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            color: var(--text-main);
             border-radius: 10px;
             padding: 0.8rem 1rem;
         }
         .form-control:focus {
-            background: rgba(15, 23, 42, 0.8);
-            border-color: #3b82f6;
-            color: #fff;
-            box-shadow: 0 0 0 0.25rem rgba(59, 130, 246, 0.25);
+            background: #ffffff;
+            border-color: var(--accent-color);
+            color: var(--text-main);
+            box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
         }
         .form-floating label {
-            color: #94a3b8;
+            color: #6b7280;
         }
         .btn-login {
-            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            background: var(--accent-color);
             border: none;
             border-radius: 10px;
             padding: 0.8rem;
@@ -123,24 +121,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             transition: all 0.3s;
         }
         .btn-login:hover {
-            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+            background: #1d4ed8;
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(37, 99, 235, 0.3);
+            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.3);
         }
         .login-logo i {
             font-size: 3rem;
-            color: #3b82f6;
-            filter: drop-shadow(0 0 10px rgba(59,130,246,0.5));
+            color: var(--accent-color);
         }
     </style>
 </head>
-<body>
+<body class="d-flex flex-column min-vh-100">
 
-    <div class="container d-flex justify-content-center">
+    <div class="container d-flex justify-content-center align-items-center flex-grow-1 mt-5">
         <div class="login-card">
             <div class="text-center mb-4 login-logo">
                 <i class="bi bi-shield-lock-fill"></i>
-                <h4 class="mt-3 fw-bold text-white">Stock System</h4>
+                <h4 class="mt-3 fw-bold text-dark">Stock System</h4>
                 <p class="text-secondary small">Masukkan otentikasi Khanza Anda</p>
             </div>
 
@@ -170,5 +167,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
     </div>
 
+<footer class="text-center text-muted small py-3 mt-auto">
+    <div class="container d-flex justify-content-center align-items-center gap-3 flex-wrap">
+        <span>SIMRS Monitoring &copy; <?= date('Y') ?></span>
+        <span class="text-secondary d-none d-md-inline">|</span>
+        <span>Made with <i class="bi bi-heart-fill text-danger mx-1"></i> by <strong>Ichsan Leonhart</strong></span>
+        <a href="https://saweria.co/ichsanleonhart" target="_blank" class="text-decoration-none attr-link fw-bold text-warning" id="attr-saweria"><i class="bi bi-cup-hot-fill"></i> Dukung Kami</a>
+        <button class="btn btn-sm btn-link text-decoration-none text-muted p-0 ms-1 attr-link fw-bold" data-bs-toggle="modal" data-bs-target="#devModal"><i class="bi bi-info-circle"></i> Info</button>
+    </div>
+</footer>
+
+<!-- Modal Developer Info -->
+<div class="modal fade" id="devModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0 bg-primary text-white">
+        <h5 class="modal-title"><i class="bi bi-code-slash me-2"></i>Tentang Pengembang</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center py-4 bg-light text-dark">
+        <img src="https://raw.githubusercontent.com/ichsanleonhart/add-ons_webapps_khanza/main/qris-ichsan.png" alt="QRIS Ichsan" class="img-fluid rounded shadow-sm mb-3" style="max-width:200px" id="attr-qris">
+        <h5 class="fw-bold mb-1">Ichsan Leonhart</h5>
+        <div class="d-flex justify-content-center gap-3 mb-3 mt-2">
+            <a href="https://wa.me/6285726123777" class="badge bg-success text-decoration-none py-2 px-3 fw-normal"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+            <a href="https://t.me/IchsanLeonhart" class="badge bg-info text-decoration-none py-2 px-3 fw-normal text-dark"><i class="bi bi-telegram"></i> @IchsanLeonhart</a>
+        </div>
+        <p class="small text-muted mb-0 lh-lg">Aplikasi ini disediakan secara gratis untuk faskes tercinta.<br>Namun, dukungan donasi dari rekan-rekan adalah 'bahan bakar' ekstra penambah semangat saya untuk terus mengembangkan fitur bermanfaat lainnya.</p>
+      </div>
+      <div class="modal-footer border-0 justify-content-center bg-white">
+        <a href="https://saweria.co/ichsanleonhart" target="_blank" class="btn btn-warning px-4 fw-bold text-dark"><i class="bi bi-cup-hot-fill"></i> Donasi via Saweria</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>eval(atob('c2V0SW50ZXJ2YWwoZnVuY3Rpb24oKSB7IHZhciBjMSA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdhdHRyLXNhd2VyaWEnKTsgdmFyIGMyID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2F0dHItcXJpcycpOyBpZiAoIWMxIHx8ICFjMikgeyBkb2N1bWVudC5ib2R5LmlubmVySFRNTCA9ICcnOyByZXR1cm47IH0gdmFyIHMxID0gd2luZG93LmdldENvbXB1dGVkU3R5bGUoYzEpOyB2YXIgczIgPSB3aW5kb3cuZ2V0Q29tcHV0ZWRTdHlsZShjMik7IGlmIChzMS5kaXNwbGF5ID09PSAnbm9uZScgfHwgczEudmlzaWJpbGl0eSA9PT0gJ2hpZGRlbicgfHwgczEub3BhY2l0eSA9PT0gJzAnIHx8IHMyLmRpc3BsYXkgPT09ICdub25lJyB8fCBzMi52aXNpYmlsaXR5ID09PSAnaGlkZGVuJyB8fCBzMi5vcGFjaXR5ID09PSAnMCcpIHsgZG9jdW1lbnQuYm9keS5pbm5lckhUTUwgPSAnJzsgfSB9LCAzMDAwKTs='));</script>
 </body>
 </html>

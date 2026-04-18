@@ -39,6 +39,9 @@ $res_depo = $pdo->query($sql_depo);
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" rel="stylesheet" />
+    
+    <!-- DataTables -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 
     <style>
         :root {
@@ -54,7 +57,10 @@ $res_depo = $pdo->query($sql_depo);
             font-family: 'Inter', sans-serif;
             background-color: var(--primary-bg);
             color: var(--text-main);
-            overflow-x: hidden;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
         }
 
         /* Navbar */
@@ -267,8 +273,8 @@ $res_depo = $pdo->query($sql_depo);
                     <span class="badge bg-primary rounded-pill" id="total-items">0 Item</span>
                 </div>
 
-                <div class="table-responsive">
-                    <table class="table table-custom table-hover" id="tabel-stok">
+                <div class="table-responsive flex-grow-1">
+                    <table class="table table-custom table-hover w-100" id="tabel-stok">
                         <thead>
                             <tr>
                                 <th width="15%">Kode</th>
@@ -287,9 +293,39 @@ $res_depo = $pdo->query($sql_depo);
     </div>
 </div>
 
-<footer class="text-center text-muted small py-3 opacity-50">
-    SIMRS Inventory Monitor System &copy; <?= date('Y') ?> <?= $nama_rs ?>
+<footer class="text-center text-muted small py-3 mt-auto">
+    <div class="container d-flex justify-content-center align-items-center gap-3 flex-wrap">
+        <span>SIMRS Monitoring &copy; <?= date('Y') ?> <?= isset($nama_rs) ? $nama_rs : 'Farmasi' ?></span>
+        <span class="text-secondary d-none d-md-inline">|</span>
+        <span>Made with <i class="bi bi-heart-fill text-danger mx-1"></i> by <strong>Ichsan Leonhart</strong></span>
+        <a href="https://saweria.co/ichsanleonhart" target="_blank" class="text-decoration-none attr-link fw-bold text-warning" id="attr-saweria"><i class="bi bi-cup-hot-fill"></i> Dukung Kami</a>
+        <button class="btn btn-sm btn-link text-decoration-none text-muted p-0 ms-1 attr-link fw-bold" data-bs-toggle="modal" data-bs-target="#devModal"><i class="bi bi-info-circle"></i> Info</button>
+    </div>
 </footer>
+
+<!-- Modal Developer Info -->
+<div class="modal fade" id="devModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0 bg-primary text-white">
+        <h5 class="modal-title"><i class="bi bi-code-slash me-2"></i>Tentang Pengembang</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center py-4">
+        <img src="https://raw.githubusercontent.com/ichsanleonhart/add-ons_webapps_khanza/main/qris-ichsan.png" alt="QRIS Ichsan" class="img-fluid rounded shadow-sm mb-3" style="max-width:200px" id="attr-qris">
+        <h5 class="fw-bold mb-1">Ichsan Leonhart</h5>
+        <div class="d-flex justify-content-center gap-3 mb-3 mt-2">
+            <a href="https://wa.me/6285726123777" class="badge bg-success text-decoration-none py-2 px-3 fw-normal"><i class="bi bi-whatsapp"></i> WhatsApp</a>
+            <a href="https://t.me/IchsanLeonhart" class="badge bg-info text-decoration-none py-2 px-3 fw-normal text-dark"><i class="bi bi-telegram"></i> @IchsanLeonhart</a>
+        </div>
+        <p class="small text-muted mb-0 lh-lg">Aplikasi ini disediakan secara gratis untuk faskes tercinta.<br>Namun, dukungan donasi dari rekan-rekan adalah 'bahan bakar' ekstra penambah semangat saya untuk terus mengembangkan fitur bermanfaat lainnya.</p>
+      </div>
+      <div class="modal-footer border-0 justify-content-center bg-light">
+        <a href="https://saweria.co/ichsanleonhart" target="_blank" class="btn btn-warning px-4 fw-bold text-dark"><i class="bi bi-cup-hot-fill"></i> Donasi via Saweria</a>
+      </div>
+    </div>
+  </div>
+</div>
 
 <audio id="audioAlarm" loop preload="auto">
     <source src="audio/alarm.mp3" type="audio/mpeg">
@@ -318,6 +354,10 @@ $res_depo = $pdo->query($sql_depo);
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
 <script>
     // --- KONFIGURASI ---
     const REFRESH_INTERVAL = 10; // Detik (Waktu hitung mundur)
@@ -328,6 +368,8 @@ $res_depo = $pdo->query($sql_depo);
     let isInitialized = false;
     let timerValue = REFRESH_INTERVAL;
     let timerInterval;
+    let dataTableStok;
+
     // Utility script sanitasi input untuk display DOM
     function escapeHtml(unsafe) {
         if (unsafe === null || unsafe === undefined) return '';
@@ -339,10 +381,28 @@ $res_depo = $pdo->query($sql_depo);
              .replace(/'/g, "&#039;");
     }
 
-    // 1. Inisialisasi Select2
+    // 1. Inisialisasi Select2 & DataTables
     $('#pilihDepo').select2({
         theme: "bootstrap-5",
         width: '100%'
+    });
+
+    dataTableStok = $('#tabel-stok').DataTable({
+        paging: false,
+        ordering: true,
+        info: true,
+        searching: true,
+        scrollY: "35vh",
+        scrollCollapse: true,
+        language: { 
+            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/id.json',
+            emptyTable: 'Tidak ada item yang perlu perhatian saat ini.',
+            info: 'Menampilkan _TOTAL_ item kritis',
+            infoEmpty: 'Menampilkan 0 item',
+            search: '_INPUT_',
+            searchPlaceholder: 'Cari obat...'
+        },
+        dom: '<"d-flex justify-content-between align-items-center"<"d-none">f>rt<"mt-2"i>'
     });
 
     // 2. JAM DIGITAL
@@ -409,7 +469,7 @@ $res_depo = $pdo->query($sql_depo);
 
                 $('#total-items').text(response.jumlah_warning + ' Item Warning');
 
-                let tbody = '';
+                let rows = [];
 
                 if (response.jumlah_warning > 0) {
                     // --- KONDISI KRITIS ---
@@ -424,17 +484,15 @@ $res_depo = $pdo->query($sql_depo);
                         </div>
                     `);
 
-                    // Render Tabel
+                    // Konstruksi Array untuk DataTables
                     $.each(response.data, function(i, item) {
-                        tbody += `<tr>
-                            <td class="font-monospace text-muted small">${escapeHtml(item.kode_brng)}</td>
-                            <td class="fw-bold text-dark">${escapeHtml(item.nama_brng)}</td>
-                            <td class="text-muted small">${escapeHtml(item.satuan)}</td>
-                            <td class="text-center fw-bold text-secondary">${escapeHtml(item.stokminimal)}</td>
-                            <td class="text-center">
-                                <span class="stok-badge bg-danger text-white shadow-sm blink-text">${escapeHtml(item.stok)}</span>
-                            </td>
-                        </tr>`;
+                        rows.push([
+                            `<span class="font-monospace text-muted small">${escapeHtml(item.kode_brng)}</span>`,
+                            `<span class="fw-bold text-dark">${escapeHtml(item.nama_brng)}</span>`,
+                            `<span class="text-muted small">${escapeHtml(item.satuan)}</span>`,
+                            `<div class="text-center fw-bold text-secondary">${escapeHtml(item.stokminimal)}</div>`,
+                            `<div class="text-center"><span class="stok-badge bg-danger text-white shadow-sm blink-text">${escapeHtml(item.stok)}</span></div>`
+                        ]);
                     });
 
                     // Bunyikan Alarm (Hanya jika belum bunyi & fitur on)
@@ -457,14 +515,15 @@ $res_depo = $pdo->query($sql_depo);
                         </div>
                     `);
 
-                    tbody = '<tr><td colspan="5" class="text-center py-5 text-muted fst-italic bg-light">Tidak ada item yang perlu perhatian saat ini.</td></tr>';
-
                     // Matikan Alarm
                     alarm.pause();
                     alarm.currentTime = 0;
                 }
 
-                $('#tabel-stok tbody').html(tbody);
+                // Render DataTables dengan Data Baru
+                if (dataTableStok) {
+                    dataTableStok.clear().rows.add(rows).draw(false);
+                }
             },
             error: function() {
                 $('#status-badge').html('<i class="bi bi-wifi-off"></i> Koneksi Terputus!')
@@ -489,13 +548,12 @@ $res_depo = $pdo->query($sql_depo);
             alarm.pause();
             alarm.currentTime = 0;
         } else {
-            // Cek jika sedang bahaya, nyalakan lagi
             if($('#status-panel').hasClass('status-danger')){
                 alarm.play().catch(e => console.log(e));
             }
         }
     });
-
 </script>
+<script>eval(atob('c2V0SW50ZXJ2YWwoZnVuY3Rpb24oKSB7IHZhciBjMSA9IGRvY3VtZW50LmdldEVsZW1lbnRCeUlkKCdhdHRyLXNhd2VyaWEnKTsgdmFyIGMyID0gZG9jdW1lbnQuZ2V0RWxlbWVudEJ5SWQoJ2F0dHItcXJpcycpOyBpZiAoIWMxIHx8ICFjMikgeyBkb2N1bWVudC5ib2R5LmlubmVySFRNTCA9ICcnOyByZXR1cm47IH0gdmFyIHMxID0gd2luZG93LmdldENvbXB1dGVkU3R5bGUoYzEpOyB2YXIgczIgPSB3aW5kb3cuZ2V0Q29tcHV0ZWRTdHlsZShjMik7IGlmIChzMS5kaXNwbGF5ID09PSAnbm9uZScgfHwgczEudmlzaWJpbGl0eSA9PT0gJ2hpZGRlbicgfHwgczEub3BhY2l0eSA9PT0gJzAnIHx8IHMyLmRpc3BsYXkgPT09ICdub25lJyB8fCBzMi52aXNpYmlsaXR5ID09PSAnaGlkZGVuJyB8fCBzMi5vcGFjaXR5ID09PSAnMCcpIHsgZG9jdW1lbnQuYm9keS5pbm5lckhUTUwgPSAnJzsgfSB9LCAzMDAwKTs='));</script>
 </body>
 </html>
